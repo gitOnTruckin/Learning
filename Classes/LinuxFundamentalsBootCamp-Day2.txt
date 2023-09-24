@@ -1,0 +1,63 @@
+cp -a - copy hidden files, may include . and ..
+
+[command] 2>/dev/null - don't care about error messages
+command >> test.log -- append to log
+
+tree -- show directory structure
+tree -L 2 -- limits level
+
+ln -s countdown another - symbolic link
+can create symbolic link to a drectory
+
+ln - hard link can't create a link across block devics
+lsblk - list blocks
+
+sudo find / -name linda -exec cp {} /home/linda/ \;
+
+tar -czvf archive.tar /home -- use z (gzip) or j (bzip2) or J (xz)
+tar -tvf - show the contents of an archive
+
+cp /etc/[abc]* /tmp/files - copy files starting with a, b, c
+
+mkdir /home/{videos, docs, pics} - create several directories at once
+
+Only find command has -exec
+
+"cd -"  - brings back to last directory you were in
+
+grep with -A -B -C (-A5)-- see lines above, before and both above and before 
+
+grep -E -- extended regular expressions
+
+grep 'bo\{3\}' regex, grep -E 'bo{3}'
+
+ps aux | tee psfile | grep ssh -- output to psfile and give input to grep ssh
+
+history -d 22 -- delete line 22
+
+sudo sh -c "echo password | passwd --stdin linda" --Everything has sudo privilidges
+
+sudo vi /etc/bashrc -- shouldn't modify use sh in /etc/profile.d
+
+
+Cntrl-l - wipe screen
+Cntrl-u - clear current line
+Cntrl-c - terminate program
+Cntrl-z - suspend program -- could use fg,bg
+Cntrl-k - clear from cursor to end of line
+Cntrl-d - Exit out, stop job
+
+dnf history
+
+chmod 750 myfile rwx r-x ---
+
+
+
+
+
+
+
+
+
+
+

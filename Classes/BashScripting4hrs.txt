@@ -1,0 +1,228 @@
+export key=value for variable to be available in current shell and all subshells
+
+bash - create subshell
+
+echo $key
+echo ${key} - evaluate what is in braces as key (echo ${key}1)
+
+echo $? - exit code of last command (0 success, 1 error)
+
+exit 1 -- exit with error
+
+chsh /bin/bash - change shell to bash
+
+clear - clear screen
+
+single qoutes or backslash to avoid interpretation as in
+   echo the current '$SHELL' is $SHELL
+   echo the current \$SHELL is $SHELL
+
+declare -r ANSWER=yes set readonly variable
+
+read -- takes user input
+
+bash script executes in subshell and applies to that not current shell
+
+When using "export", variables are available in subshell as well as current shell. It becomes an environment variable for parent and subshells but not for a new shell.
+
+set -- shows local variables
+unset -- removes local variables
+
+Use "source" to import variables into the current shell.
+
+". variables" -- equivalent "source variables" -- reference in script to set variables.
+
+". colors.sh" will work on sh file in current shell instead of subshell
+
+$1 - $9 positional argument --more than 9 use ${10}
+
+$@ or $* refers to all arguments. Without qoutes they are the same.
+
+"$@" returns propertly qouted arguments
+"$*" makes all arguments a single argument
+
+"shift" removes $1 from the stack and now $1 shows $2
+
+$0 is the name of the script itself
+
+$# gives the number of arguments given to the script
+
+echo $(( 2 + 5 ))  -- evaluate inside double parenthesis
+
+--Iterate across all arguments
+for i in "$@"
+do
+	echo $i
+done
+
+while [ $COUNTER -ge 0 ]
+do
+   echo $COUNTER
+done
+
+--Command Substitution
+--Cmmand will run in its own shell as in pipe
+today=$(date +%d-%m-%y)
+echo $today
+export today -- give variable to subshells created from current shell
+
+touch /tmp/backup-$(date +%d-%m-%y)
+
+cd `uname -r` -- backtick can also be used for command substitution but is not preferred.
+
+--"Here Document" provide commands to an interactive program
+lftp localhost <<ENDSESSION
+ls
+ENDSESSION
+
+script 6
+Pattern matching
+
+${parameter#word}   -find first match from left return rightmost string
+${parameter##word}  -find last match from left return rightmost string
+${parameter%word}    -find first match from right return leftmost string  
+${parameter%%word}   -find last match from right return leftmost string
+
+--Given "/usr/bin/blah"
+>echo 'filename=${1##*/}' 
+"filename=blah"
+>echo 'directoryname=${1%/*}'
+"directoryname=/usr/bin"
+
+${parameter/pattern/string} -replace first match
+${parameter//pattern/string} -replace all
+${parameter/#pattern/string} -replace if starts with pattern
+${parameter/%pattern/string} -replace if ends with pattern
+
+https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion
+
+bc is an advanced calculation tool that allows you to work with decimals
+
+test -- checking for basic assumpitions on String, integer, files like exists
+
+[ ] --single braces allows for using test (man test options available)
+
+//Space important after [
+if [ -f /etc/hosts ]; then echo file exists; fi
+
+if true
+then
+   echo success
+else
+   echo Not successful
+fi
+
+a && b --short circuit AND -- b executed if a is true
+a || b --short circuit OR  -- b executed if a is false
+
+if[ -d $1 ] && [ -x $1 ]; then echo $1 is a directory and has execute; fi
+
+[ -f /etc/hosts ] && echo it exists
+
+bash -x --debugger for scripts
+
+exit 3-- leave the script with exit code 3
+
+[[ ]] -- double braces offers enhanced version of test single brace '[]'
+
+[[ $VAR1 = yes && $VAR2 = red ]] -- use conditional statement inside
+[[ $VAR = img* && ($VAR=*.png || $VAR=*.jpg)]] && echo var starts with img and ends with .jpg or .png
+
+//Can use functions
+minusone(){
+   COUNTER= $(( COUNTER-1 ))
+   sleep 1
+}
+
+//saves a line
+if [ -d $1 ]; then
+  echo $1 is a directory
+fi
+
+if [ -d $1 ]
+then
+  echo $1 is a directory
+elif [ -f $1 ]
+then
+ echo $1 is a file
+else
+  echo $1 is an unknown entity
+fi
+
+strace -- check efficiency of script
+time -- how much time it takes to produce a result
+
+Conditions
+----------
+if then else
+for loop
+while loop
+until loop -- run a command as long as condition is not true
+case statement
+
+//Example CASE statement
+case $COUNTRY in
+  Lithuania)
+    echo -n "Lithuanian"
+    ;;
+  Romania | Moldova)
+    echo -n "Romanian"
+    ;;
+  Italy | "San Marino" | Switzerland | "Vatican City")
+    echo -n "Italian"
+    ;;
+  *)
+    echo -n "unknown"
+    ;;
+esac
+
+
+0 is stdin
+1 is stdout
+2 is stderr
+ redirect stdout to stderr: echo test 1>&2
+ redirect stderr to stdout: echo test 2>&1
+
+echo test > file.txt equivalent to echo test 1> file.txt
+echo test 2> file.txt -- redirect error to the file
+
+ls -ld /tmp /tnt 2>/dev/null -- redirect standard error to dev/null
+
+ls -ld /tmp /tnt >/dev/null 2>&1
+--redirect output to /dev/null and error to where output is directed
+   --both to dev/null so nothing
+ 
+for i in linda samuel tom -- list of items
+
+break -- leave loop right away
+continue -- stop running current iteration and begin at next iteration
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

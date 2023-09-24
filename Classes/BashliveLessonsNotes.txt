@@ -1,0 +1,541 @@
+Issues
+2.7 Understanding Alternative Shells
+4.7 Using cut and sort 2:40 limit 3:40
+
+Not Explained
+7.1 -- '-' instead of ':-' --Different meaning if param set to null
+       ':' colon notation always returning true and not executing
+
+[[ 1 <2 ]] -- bad example should be (( 1 < 2 )) to force aritmetic
+
+----------
+
+https://mywiki.wooledge.org/BashPitfalls#cmd1_.26.26_cmd2_.7C.7C_cmd3
+http://mywiki.wooledge.org/BashGuide
+
+---
+
+/proc/[PID]/fd
+-can give list of file discriptors an where they point for a process
+1 - standard out
+2 - standard error
+
+help -- give list of internal bash commands
+help printf -- help for printf
+
+env, printenv -- show environment variables
+
+alias -- allows you to define you own commands can put in startup scripts
+--could use locally in shell script
+
+unalias -- unsets the command
+
+/etc/profile, /etc/profile.d (directory) -- for login
+/etc/bashrc - start of subshell
+
+--user specific files
+~/.bash_profile -- user specific for login
+~/.bashrc -- user specific for subshell
+~/.bash_logout -- user specific logging out
+
+login shell includes subshell envrionment but subshell doesn't include everything of a login shell
+
+Andsible, Puppet, Chef and others are used to get managed systems in a desired state.
+
+echo -e "b\nc" -- new line character
+echo -e "b\tc" -- tab character
+
+printf "%s\n" "hello world"
+
+bash options
+shopt -s checkjobs -- show any running jobs before existing
+set -x  -- show all that is run in executing a job
+bash -x script -- show what is run in executing a script
+
+bash is a superset of sh(Bourne shell)
+
+shopt +s extglob -- enable extended globbing
+?(PATTERN) -- zero or one  -- ls ?(e).txt
+*(PATTERN) -- zero or more  -- ls *(e).txt
++(PATTERN) -- one or more  -- ls +(e).txt
+@(PATTERN) -- match one  -- ls @(e).txt
+
+grep -- recommended to put text pattern in single qoutes to avoid interpretation by the shell
+
+grep -v -- Filter out grep command itself or show non-matching
+grep -l -- Just show list of files
+grep -A 1 -B 1 -- show line before and after what you are looking for
+grep -r -- recursive search in subdirectories
+
+regular expressions shouldn't be confused with globbing and only works with some tools. find utility only uses globbing.
+
+grep 'a*' a* --Different meaning of * for regex and globbing
+
+grep -E -- extended regular expression
+
+Using + and ? are using extended regular expression
+
+grep -E '^bo{3}' users
+grep '^bo\{3\}' users
+
+cut -- filter out fields based on a field separator
+
+cut -d : -f 1 /etc/passwd -- use : as delimeter and use the first field
+
+awk --More advanced options on field separator
+
+sort -- allows you to sort items
+sort -n -- numeric sort
+sort -d -- dictionary sort
+
+--Able to use sort to sort on a certin column numerically
+
+cut use the IFS or Internal Field Separator by default is space. Can define the IFS in many commands.
+
+head -3 /etc/passwd | tail -1 -- print the 3rd line of /etc/passwd
+
+tail -- gets the last 10 lines by default
+
+sed -- the stream editor
+
+sed -n 5p /etc/passwd  -- print line 5
+sed -i s/old/new/g ~/myfile
+
+sed -i -- write directly to a file
+
+sed -i 's/old/new/' ~/myfile --replace first occurrence in every line
+sed -i 's/old/new/g' ~/myfile --replace all occurrences in every line
+
+sed -e --pass edit command
+
+sed -i -e '2d' ~/myfile -- edit to delete the 2nd line
+
+awk -- used to filter text
+
+awk -F : '{print $4}' /etc/passwd -- print field 4 with : dilimeter
+awk -F : '/user/{print $4}' /etc/passwd -- look for 'user' in the row and print field 4 if found
+awk -F : '$3 > 999 {print $1}' /etc/passwd -- look for field 3 > 99 in the row and print field 1 if found
+
+type -- find out if tool is external or not
+
+You may have internal and external utility with same name. internal will win. Would need to be explicit in choosing the external.
+
+ldd $(which awk) -- show libraries used by awk
+
+--Find field 3 > 1000 and sort by dictionary then replace /bin/bash with /bin/zsh
+awk -F : '$3 > 1000 {print $0}' /etc/passwd | sort -d | sed 's/\/bin\/bash/\/bin\/zsh/'
+
+help, man bash -- get more help on using bash
+https://tldp.org/LDP/abs/html/
+
+single quotes(strong) - avoid interpretation of anything
+double qoutes(weak) - used to avoid interpretation of spaces
+backslash - used to avoid interpretation of next character
+
+declare -- set specific variable attributes. May be needed to set an array.
+declare -r ANSWER = yes -- Set $ANSWER as a read-only variable
+declare -p -- Find out the type of variable
+
+echo enter a value
+read value
+echo you have entered $value
+
+--In no variable is set will be stored in $REPLY
+
+Script starts in sub-shell at end end will get out of subshell
+--cd doesn't really change directory of parent shell
+
+source a script to include variables in current shell without creating a sub-shell
+
+--should likely put your variables in separate directory
+source myvars
+. myvars -- same thing as source myvars
+
+source file does not contain shabang at the beginning so it doesn't create a sub-shell. Should just contain variables. Could also have functions.
+
+set -- shows current environment and shell variables and shell functions
+
+"compgen -v" -- shows variables not functions -- command is about command completion
+
+shift -- moves positional parameters to the left by 1
+shift 3 -- moves parameters to the left by 3
+
+here document -- can be used to pass list of commands to an interactive program like lftp
+
+lftp localhost <<ENDSESSION
+ls
+put /etc/hosts
+ls
+quit
+ENDSESSION
+
+--Creat configuration file in your script
+--cat can read from standard input if not given a file also awk
+cat > /etc/docker/daemon.json <<EOF
+{
+  "log-driver": "json-file"
+} 
+EOF
+
+--Treat file discriptors like file locations
+--Can use /dev/stdin to point to stdin like a file if utility not taking from standard input by default but instead a file
+/dev/stdin
+/dev/stdout
+/dev/stderr
+/dev/null --discard device
+
+--Here String "<<<"
+
+--commands execute in separate subshell so variables get lost
+echo "hello world" | read first second
+echo $second $first
+
+--Can use instead
+echo "hello world" | {
+read first second
+echo $second $first
+}
+
+--Easier to use Here String
+read first second <<< "hello world"
+echo $second $first
+
+
+--function
+function_name(){
+  commands
+}
+
+function function_name{
+  commands
+}
+
+bash-wide functions are initialized from Bash startup scritps
+set -- show bash functions and bash variables
+unset -- remove function or variable
+
+hello(){
+  echo hello $1
+}
+hello bob
+
+--A function can return status codes such as
+return 1 -- Exit out of function and give Error code 1
+
+--Functions are more like commands then an actual function
+
+## Local variables store the name of passed params
+function func_modify_passed_params() {
+       local __result1=$1
+       eval $__result1=$((2+3))
+}
+func_modify_passed_params result1
+echo $result1
+
+--Can use local -n for same effect as above
+function example {
+  local -n VAR=$1
+  VAR=foo
+}
+example RESULT
+echo $RESULT
+
+--Parameter substitution
+---Doesn't Set 
+echo ${username:-${whoami}} -- Substitutes a default if parmater not set. The 
+parameter itself is not overwritten.
+--${parameter-default}
+  --If declared and set to null will not use default
+
+---Sets the Parameter
+echo ${username:=${whoami}} -- substitute and set if parameter not present.
+--${parameter=default}
+  --If declared and set to null will not use default 
+
+--Show Error exit with status 1
+echo ${username:?Missing username}
+--${parameter?err_msg}
+   --If declared and set to null will not show error. Shows null.
+
+--Show the length of the expanded parameter
+echo ${#PATH}
+
+--Assign curl to EMPTY_COMMAND and then run curl. Gives error.
+${EMPTY_COMMAND:=curl}
+
+--Assignment and then don't do anything will always return 0 or true
+: ${EMPTY_COMMAND:=curl}
+
+--Setting positional paramters
+--Can use 'set argument' to set positional parameters. Can't set directly.
+set - filename_set
+
+message=${1:-Missing 1 Param} --Use default and set to message variable if position 1 missing. Dosen't set positional variable since not possible.
+
+--Enable Extended Globbing - Can do in script
+shopt -s extglob
+
+  ?(pattern-list)   Matches zero or one occurrence of the given patterns
+  *(pattern-list)   Matches zero or more occurrences of the given patterns
+  +(pattern-list)   Matches one or more occurrences of the given patterns
+  @(pattern-list)   Matches one of the given patterns
+  !(pattern-list)   Matches anything except one of the given patterns
+
+ls +(ab|def)*+(.jpg|.gif) --match abc.jpg defhq.gif
+
+-Regular Globbing
+rm [xyz]*  -- remove files x.doc, y.txt, z.pdf
+
+-Arithmetic Calculation + - / * %
+$(( ... ))
+
+-Advanced Calc tool
+echo "125" | bc -l
+
+-TR utility for translation of characters
+echo hello | tr [:lower:] [:upper:]
+
+-test command
+test -f /et/kkhd or [ -f /etc/kkhhk ]
+
+if [ -f /etc/hosts ]; then echo file exists; fi
+
+Logical test are if then else tests written in a different way
+
+[ -f /etc/hosts ] && echo file found --Short circuit And first evals true eval second
+[ -f /etc/hhhsss ] || echo file not found -- Short circuit OR first evals false eval second
+
+if [ -d $1 ] && [ -x $1 ]; then echo $1 is a directory and has execute; fi
+
+if [ -f $1 ]
+then 
+ 	echo $1 is a file
+else
+ 	echo $1 is not a file
+fi
+
+if [ -d $1 ]
+then 
+ 	echo $1 is a directory
+elif [ -f $1 ]
+then
+	echo $1 is a file 
+else
+ 	echo $1 is a an unknown entity 
+fi
+
+--In vim to turn on line numbers
+:se number
+
+[[ condition ]] -- enhanced test, bash internal
+
+[[ $VAR1 = yes && $VAR2=red ]] -- conditional statement within test ( [ -d $1 ] && [ -x $1 ] ) --simple test
+[[ -e $b ]] -- If file $b contains spaces don't need qoutes
+[[ $VAR=img* && ($VAR=*.png | $VAR=*.jpg) ]] -- nested logical expr
+
+--print out 115 through 127
+for i in {115..127}; do echo $i; done
+
+"break" and "continue" -- To get out of loops break exit the loop, continue immediately go to next iteration
+
+--evaluate options a and b and while evaluating put them in tempoaray variable opts
+--Will say if b requires a value and if have an illegal option
+while getopts "ab:" opts //a is straight option, b has option value
+
+--define what happens when encounter a specific option
+case $opts 
+
+while getopts "hs:" arg; do
+	case $arg in
+		h)
+		echo "usage"
+		;;
+		s)
+		strength=$OPTARG
+		echo $strength
+		;;
+	esac
+shift "$((OPTIND-1))"
+done
+
+shift "$((OPTIND-1))" --Shift parameters by 1 for each existing option till all that is left is non-option arguments. Assumes options are at the beginning.
+
+--Menus
+PS3='Enter your choice: '
+options=("Option 1" "Option 2" "Option 3" "Quit")
+
+select opt in "${options[@]}"
+do
+	case $opt in
+		"Option 1")
+			echo "you have selected option 1"
+			;;
+		"Option 3")
+			echo "you have selected $REPLY which is $opt"
+			;;
+		"Quit")
+			break
+			;;
+		*) echo "invalid option $REPLY";;
+	esac
+done
+--$REPLY holds what was entered
+
+--trap is used to run a command while catching a signal
+--SIGKILL cannot be trapped
+--man 7 signal or trap -l for overview
+--SIGINT Cntrl-C -- SIGTERM kill -15
+--EXIT --reaches end in normal way
+trap "echo ignoring signal" INT TERM
+echo pid is $$
+
+--Arrays can be used to help with issues with files containing spaces
+--String method below could have issues with spaces
+string: files=$(ls *.doc); cp $files ~/backup 
+array:  files=(*.txt); cp "${files[@]}" ~/backup
+
+--Array Types
+---Index arrays address a value by using an index number
+---Associative arrays address a value by using a name
+  --Were used in creating the menu
+  --declare -A
+my_array=(one two three)
+echo "${my_array[2]}" --three (starts at 0)
+echo "${my_array[@]}" --refer to all elements in array
+echo "${!my_array[@]}" --refer to all keys in the array
+echo "${#my_array[@]}" --print length of the array
+
+--Arrays should always be used with quotes or may fail over spaces
+
+--Print index as well as values
+for i in "${!my_array[@]}"; do
+	echo "$i" "${my_array[$i]}"
+done
+
+--If only 3 elements will add to 9th key and not create keys for 4 though 8
+my_array[9]=d
+
+--Append to end of array[]
+my_array+=(Four Five)
+
+--Associative Array
+--If my_array set to indexed first may not be able to override to associative so unset
+--Similar to HashMap giving key value pairs
+declare -A my_array=([value1]=cow [value2]=sheep)
+
+--Process Substitution 
+<(my_command_list) ----Creates a file descriptor with output of command list
+echo <(echo bar) -- prints "/dev/fd/63" (Symbolic link to pipe)
+--Output of commands goes to temporary file descriptor 
+wc < <(echo bar; echo foo)  --create file descriptor of commands and go to standard in
+--Similar to below
+$(echo foo; echo bar) | wc
+--May need file descriptors to be used for parameters
+diff <(ls /bin) <(ls /usr/bin)
+
+--Subshell notation
+(cd ..; ls) -- This will be executed in a subshell and not change the directory
+
+--mapfile to fill an array with the result of a command
+--take output of command and redirect to standard input
+mapfile -t my_array < <(my_command)
+
+--Add item by item in loop
+--take output of command to stdin and starts reading
+--IFS=" " sets the Internal Field Separator to space for the read command only
+--read -r tells read not to interpret backslashes as escape characters
+--keeps reading as long as there is more to read from stdin
+my_array=()
+while IFS= read -r line; do
+	my_array+=( "$line" )
+done < <(my_command)
+
+--Read Array is another solution --Similar to mapfile but for older versions linux
+readarray -t my_array < <(seq 5)
+
+--Output the declaration of my_array
+declare -p my_array
+
+--Can start directly giving values for array indices
+Line[1]
+Line[2]
+
+tput bold # Bold print
+
+--Different ways to iterate across keys
+for i in $(seq ${#line[@]}); do echo "${line[i]}"; done
+for i in {1..3}; do echo "${line[i]}"; done
+for i in 1 2 3; do echo "${line[i]}"; done
+for i in "${!my_array[@]}"; do echo "$i" "${my_array[$i]}"; done
+
+--Iterate across values
+for i in "${line[@]}" do echo "$i"; done
+
+--Associative Arrays don't have proper ordering by default
+---Can use indexed array at the same time to keep ordering
+declare -A roster; declare -a order
+
+janitor_arr+=([Monday]=Tom); order+=(Monday)
+
+for i in "${order[@]}"; do
+i	echo "$i" "${roster[$i]}"
+done
+
+set -e or set -o errexit -- Exit on Error
+set -x -- Enable Debugging
+set +x -- Disable Debugging
+set -i -- Interactive Mode
+set -v -- Verbose Mode
+
+Please set options at certain sections of your script
+
+--Write Debug Information to a File Descriptor 15 pointing to a file
+exec 15>/tmp/bash-debug.log
+export BASH_XTRACEFD=15
+
+set -x
+-----
+set +x
+# Close the file descriptor
+exec 15>&-
+
+--Running bash -x
+--If running bash -x from command line would debug entire script
+bash -x main
+
+--logger
+logger High Utilization --Goes to syslog
+journalctl ---Show logger
+
+--curl
+Fetch files from internet
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

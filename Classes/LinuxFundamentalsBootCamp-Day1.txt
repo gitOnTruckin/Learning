@@ -1,0 +1,54 @@
+echo $? - exit code of last command
+
+ls 34234 || echo $? -- print error code if file not existing (or condition)
+Similarly && (and condition)
+
+timedatectl to set time
+
+/etc/passwd - users administered file
+passwd - set own password
+sudo passwd linda - set password on linda
+
+touch newfile - see if can write a file/directory
+
+man -k ls - find commands of ls
+apropos ls - Same
+
+/[text] to search within man, 'n' for next hit
+
+wc - word count
+
+man -k user | grep 8 - admin commands for user
+
+sudo mandb - update man database
+
+G in man - Go to End of doc
+
+pinfo '(coreutils) ls invocation' - bottom of man page
+ N-Next P-Previous U-Up
+
+lsblk - list block devices
+
+Globbing
+ls a* - any amount of characters wildcard
+ls a?a - one character wildcard
+la a?[a-f]* - one character, range a-c character, any amount of characters
+ls Do[cw]* - can be c or w followed by any amount of characters 
+
+Double Tab show listing of possibilites
+
+!r - look at history and run command starting with r
+
+usr - program files directory
+  -- usr/local/bin -- your own sh files
+  -- usr/bin -- program files
+etc - config files
+var - dynamic created files
+  -- var/log/messages
+
+nohup command -Will not hangup on jobs after exiting the terminal
+
+
+
+
+
