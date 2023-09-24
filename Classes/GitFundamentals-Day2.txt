@@ -1,0 +1,208 @@
+
+Clone from Remote to local Environment
+Checkout to Local and commit to Local
+Push changes of Local to Remote
+
+Fetch - Synchronize Local Repo with Remote Repo
+Pull - Fetch and Merge changes to working directory
+
+git rm
+--removes tracked file from working and/or staging
+--Need to commit the removal if file in local repo
+--can provide files, directories, or file globs
+
+git rm
+--If file staged and want to remove from staging and delete the file in working
+git rm -f
+--If tracked file file in working and staging are different will need to force the removal to delete the file in working
+git rm --cached
+--Remove file from staging and keep in working untracked
+
+--Will not remove from previous commit will need something like filter branch to remove from past commits.
+
+Reset
+--With reset can point to previous commit and optionally update working/staging based on this.
+---Soft- change the pointer, Mixed- clean out staging area, Hard- update working directory with contents
+
+Revert
+--Add new change that cancels out the effects of a previous change. Go back to changes of previous commit and commit.
+
+Revert a better way to do this if content already pushed to remote since adds changes to the end of current commit.
+Reset would point back to previous commit rather than just adding additional content so that remote would point to this previous commit.
+
+git reset --hard 87ba8bc
+--overwrite working directory with this commit
+git reset current~1 [--mixed]
+--tag is called 'current', can use SHA1, etc.
+--current~1 means one before current commit
+--current^ (that many carrots before), current^^ (2 before)
+
+git revert HEAD
+--get content of previous commit from HEAD and commit with that content
+--get a new commit rather and reset which changes pointer of current commit
+
+git stash [push]
+--saves state of current work into a backup queue
+--work in working directoy or staging not committed
+--makes side copy of current work with work, staging setback to clean state
+git stash -u
+--Also save the untracked files
+git stash push -m 'cool feature'
+--save stash with comment
+--can save several stashes to the queue. Useful to save with note.
+git stash pop, git stash apply
+--get back to old state saved to the queue
+--git stash pop - takes saved work out of the queue
+--git stash apply - apply saved work from the queue and keeps it in the queue
+git stash apply stash@{0}
+--apply content at this point of the queue
+
+Renaming Files
+--git mv
+--renames a file locally and stages the change, would then commit
+--git shows "renamed" in status
+--similar to rm remove and then add of new file
+
+branch pointer points to the latest commit snapshot which itself points to previous commit
+--branch is just a file containing 40 character SHA-1 checksum of the commit it points to
+
+HEAD is pointer that points to the current branch.
+--Initially HEAD points to main branch
+
+git branch <branch>
+--creates a new branch pointer
+git checkout <branch>
+--Moves HEAD to point to checkedout branch.
+--Update working directoy with contents of latest commit of this branch
+
+In checking out a branch may need to stash modified content so that clean for checkout
+
+git branch <no args>
+--Show which branch currently on
+
+git branch abc/web_client
+--Can create a namespace for the branch as in abc above
+git checkout -b web_client
+--Create the branch and switch to this new branch
+
+"git switch" is similar to checkout but just for branches
+--checkout can work with any SHA1
+
+git merge <branch>
+--current branch is the target, <branch> is being merged from
+--everything should be committed first
+
+-Merge Strategy: Fast-Forward
+git checkout main
+git merge hotfix
+--Pointer to main moved to hotfix pointer
+--If changes in hotfix is what is currently in main plus changes
+
+-Merge Strategy: 3-way Merge
+--If both the main and feature branch have their own changes not able to do fast-forward
+--Look at common-ancestor and see difference between both branch-tips
+--Creates a new commit based on combining these differences
+
+Merge Conflict
+--When have a conflict can get into a Merge state that needs to be resolved or Aborted to move forward
+--"git status" will show unmerged files in the working directory
+---files successfully merged placed in staging area ready to commit
+--After resolution in working directory use "git add" to stage and commit
+--Can use "git mergetool" to resolve graphically
+--"get merge --abort" abort the merge and get out of current Merge state
+--Once resolved can delete branch if no longer needed - "get branch -d new-branch"
+
+-Different merge strategies like keeping changes of certain branch, etc.
+--Can specify strategy -X <strategy>
+
+What is a rebase?
+-Take all of the changes committed in one branch and replay them in sequence on another one.
+git checkout feature
+git rebase main
+--series of merges based on changes in sequence of feature from the common ancestor of main and feature
+--moves branch pointer to new rebase point. At the end of main in this case.
+--keep the history of commits as they were committed in feature instead of one big merge
+--These commits are new merge commits as a result of merging along the feature history
+--feature would then have the changes of main
+--Now based on main or rebased with pointer at end of main
+
+The feature branch commits still exists and can point to those with a reset to undo the rebase operation.
+--Can be difficult to remove commits no longer pointed to
+
+git clone <url> <new name>?
+--creates a directory with project name
+--checks out working copy to latest version
+
+Default name of remote repo is "origin"
+
+git remote
+--Shows handle by default. "origin" is the default.
+git remote -v
+--Shows mapped url as well
+git remote show [handle]
+--Show extended info about remote
+--Can add another remote handle if wanted. Maybe one to push changes and another to pull updates from other users.
+git remote rename <old> <new>
+--rename remote handle
+git remove rm <handle>
+--remove handle
+
+git fetch origin
+--Get latest of data to the local repository. Doesn't merge or disturb local content.
+
+When you fork a remote repository it copies that remote to your user remote repo space
+
+git pull
+--Does both a fetch and a merge into local working directory
+
+git push <handle> <branch>
+--Need to have latest content in order to push. May need to fetch latest.
+
+git branch -r
+--list the remote tracking branches
+git branch -av
+--list remote and local branches in verbose mode
+
+git branch features origin/features
+--create local branch features that tracks the remote features branch
+
+git push -u origin main
+--add upstream tracking reference
+
+Remote and local branch pointers can get out of sync
+Fetch will update the remote branch pointer which may be ahead of you local branch pointer
+Needing pull to update or merge of remote branch
+
+Git Professional
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

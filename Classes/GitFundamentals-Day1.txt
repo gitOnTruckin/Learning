@@ -1,0 +1,330 @@
+-latest downloads
+https://git-scm.com/
+
+Public Hosting
+GitHub, Bitbucket
+
+Self-hosting
+GitLab (Internal), Enterprise GitHub
+
+-Ease of Use Packages
+SourceTree -Windows
+Git Extensions - Widnows
+Smart Git - Window, Linux
+git-cola - Windows, Linux
+GitEye - Widnow, Linux
+
+Many GUI, Command line interfaces
+
+Gerrit - Wraps around Git. Before going to remote can give code-review
+
+Distributed Version Control
+Everyone has local repository that when ready can push to remote repository
+-Receive a Clone of the remote repository to the local environment
+-Checkout and then commit to local
+-Once local is correct and you are ready can push to the Remote repo
+-Dont need connection to remote while working on local
+
+Local
+ -Working Directory -> Staging Area -> Local Repository
+Remote
+ -Remote Repository
+
+Working Directory -> Staging -- ADD - Add items to staging
+Staging Area -> Local Repository -- COMMIT - Commit to local repo
+Local -> Working -- Checkout - Checkout from Local to Working
+Local Repo -> Remote Repo -- Push - Push to Remote 
+Remote Repo -> Local Repo -- Clone - Clone copy of Remote to Local at a certain time
+Remote Repo -> Local Repo -- Fetch - Fetch updates to Remote to Local
+Remote Repo -> Local Repo -- Pull - Fetch and merge, Get changes and attempt to merge
+
+In traditional source - unit of granularity is a file
+In Git unit of granularity is a tree or directory structure at a point in time
+
+In traditional, the changes of each file is stored and is reconstructed through these versions to get the latest. Can be more processing the further back you get.
+
+In Git, creates a snapshot commit of changes to all files, may not need actual commit of file if no changes just a link. Not dependenent on early commits to reconstruct the latest.
+
+Git might compress and pack files with indexing to make more efficient.
+
+Staging Area
+-Prepare - Choose what items are ready to go into Staging for next commit
+-Repair - Can "Amend" last commit to add or replace content of Staging to this commit
+-Merge with Conflicts- Changes Merged Cleanly left in Staging. Other changes left in working directory and it is left to you to merge those changes back in to staging.
+
+Commit to move from staging to local repo stored in .git directory
+
+git clone
+-get copy from remote repo
+git init
+-create repo with existing files
+-creates repo skeleton in .git directory
+git add
+-Tells git to start tracking files --"git add *.c" or "git add ." (files and dirs recursively)
+-Can tell git to not track certain files "ignore"
+git commit
+-Promote files to local repo
+-Use -m to supply a comment
+-Commits everything unless tell it otherwise
+
+Changes for a commit is given a checksum value for those changes. SHA-1 hash.
+-You get a handle to a snapshot with the SHA-1  value
+-Git stores/points to everything by hash value
+-SHA-1 value is 40 characters of hex
+-Don't normally need all 40 can distinctly identify with much less
+-Similar to version number
+
+Commits
+-Will commit to local repo a snapshot of local working area
+-Should provide a commit message. Pass with -m "[message]"
+-outputs branch committed, checksum, number of files changes, stats 
+
+git add -p
+--Pick the parts of the file you want to stage
+
+git commit --amend
+-Allows you to fix the last commit
+-Able to add or update last commit and replace it
+-Merges changes to the Staging Area
+
+git commit -m "first update"
+git add newfile.txt (Add to Staging)
+git commit --amend (Includes newfile.txt in old commit replacing it)
+
+Take old commit to Staging. Merge with what is in Staging and create a new commit that replaces the old one.
+
+If no changes to Staging can update the commit message.
+
+git commit -am "comment" -- Shortcut to update files that have already been added.
+
+User Configuration
+-git config --global user.name "Joseph"
+-git config --global user.email "joecool@email.com"
+-- using --global persists options for all repos of the local os user home
+- git config --list (-l)  list options
+- git config user.name -- See what we have for name
+
+.git directory stores information about the repository
+
+git init -- start with a skeleton repository of .git
+git clone -- copy of remote repository in .git
+
+In git usually work with 1 repo per module
+
+git <command> -h
+--Brings up list of options
+git <command> --help
+--brings up website
+git help <command>
+--Bring up man page
+
+How to deal with End of Line
+git config core.autocrlf=true (Windows)
+--Will checkout as Windows CRLF and commit as LF(line feed)
+git config core.autocrlf=input (Linux)
+--Check out as is and commit as Unix LF
+git config core.autocrlf=false (Not recommended)
+--Check out and commit as-is
+
+Can store system-wide config file
+/usr/local/etc/gitconfig
+git config --system
+
+Global config File for Current User
+~/.gitconfig
+git config --global
+
+Local Configuration File - Local Repo
+<repo>/.git/config
+git config
+
+Looks at Local then Global then System to use configuration
+
+Tracked
+  Modified
+  Unmodified
+  Staged
+Untracked
+  Not in Staging area
+
+In working directory will start with untracked
+Add rev.A
+--rev.A staged Changes to be committed. Staging unmodifed as compared to working directory
+Edit rev.A -> rev.B in working
+--rev.A staged Changes to be committed. Staging modified as compared to working directory
+Add rev.B
+--rev.B staged Changes to be committed. Staging unmodified as compared to working directory
+Commit
+--Nothing Staged. Staging Area clear. Nothing to commit (working directory clean). Repo and working directory in sync.
+
+git status -sb  
+-s short option
+-b branch info
+?? untracked, M modified, A added, D deleted, R renamed, C copied, U updated
+
+Head
+-pointer to last commit on current branch
+Index, Cache
+-Staging Area
+
+git diff
+--Difference between working and staging
+git diff --cached or git diff --staged
+--Difference between staging and repo
+git diff <reference> (git diff HEAD)
+--Difference between working directory and what reference is pointing to
+--HEAD last commit
+git diff <reference>..<reference>
+--Difference between commits using SHA1/tag/ etc.
+
+
+git log
+--just name, email, commit message
+git log -p or git show
+--patch or difference
+git show -5
+--last 5 commits with patches
+git show --stat
+--show stats on number of changes
+git show --oneline
+--Only one line
+git show --pretty=oneline|short|full|fuller
+git show --since|until|after|before 2.weeks|3.19.2023|"5 minutes ago"
+
+gitk tool has history visualizer
+
+git log --pretty=format:"%h%ad|%s%d[%an]" --graph --date=short
+%h - hash
+%ad - commit date
+%s - comment
+%d - commit decoration (branch, tag)
+%an - name of author
+--graph - display commit tree in the form of an ASCII graph layout
+--date=short - keep the date format short
+
+git log --pretty=oneline --author=Joseph
+
+git config alias.<name> <operation>
+git config alias.co checkout
+git co -- git checkout
+
+git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short"
+
+git hist
+--will show log as set above with alias
+
+git hist file1
+--show history log of particular file
+
+git hist earliestSHA1..latestSHA1
+--doesn't show the earliest value
+
+git hist earliestSHA1..latestSHA1 file1
+--show history between range for a particular file excluding first value
+
+git tag
+--Instead of SHA1 to identify commit can tag with human-readable text
+git tag <tag> [commit]
+--lightweight pointer to commit
+git tag -a <tag> -m <message> [commit]
+--email, date, tagger name, comment
+
+git tag -- list tags out
+git show <tag> -- shows detail of tag
+
+git tag first earliestSHA1
+git tag last latestSHA1
+
+git hist first..last
+--related sha1 replaced with tag
+
+git hist first..last --name-only
+--show filename
+
+git hist first..last --name-only file1
+
+git diff last
+--reference by tag
+
+git diff <SHA1>..last
+--differece between SHA1/tag and another SHA1/tag
+
+.gitignore
+--list filetypes, directories you want git to ignore
+--git add . will skip the files listing here
+--use # to give comments
+--standard glob patterns work for matching
+--end pattern with / to specify a directory
+--can negate a pattern with exclamation
+
+.gitattributes
+-- can be also be saved in .git/info/attributes so that not committed with project
+-- normally have .gitattributes in root
+-- *.obj binary -specify that file is binary
+--Already sample gitattributes files on Github for certain languages
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
