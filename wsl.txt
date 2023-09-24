@@ -1,0 +1,24 @@
+Some people may need to run wsl update:
+
+wsl --update
+To enable, start your Ubuntu (or other Systemd) distribution under WSL (typically just wsl ~ will work).
+
+sudo -e /etc/wsl.conf
+Add the following:
+
+[boot]
+systemd=true
+
+Exit Ubuntu and again:
+
+wsl --shutdown
+Then restart Ubuntu.
+
+sudo systemctl status
+
+https://develmonk.com/2021/06/05/easiest-wsl2-bridge-network-without-hyper-v-virtual-network-manager/
+
+https://stackoverflow.com/questions/61002681/connecting-to-wsl2-server-via-local-network
+
+Linux Essentials for Windows
+https://learning.oreilly.com/videos/linux-essentials-for/9780137935611/

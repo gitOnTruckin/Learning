@@ -1,0 +1,10 @@
+
+https://www.jetbrains.com/help/pycharm/using-wsl-as-a-remote-interpreter.html#wsl-terminal
+add allow rul windows firewall
+https://github.com/microsoft/WSL/issues/4585
+https://knowledge.broadcom.com/external/article/221329/endpoint-protection-firewall-blocks-netw.html
+
+https://blogs.windows.com/windowsdeveloper/2016/07/22/fun-with-the-windows-subsystem-for-linux/
+
+
+
