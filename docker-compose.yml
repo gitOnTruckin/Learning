@@ -1,0 +1,12 @@
+version: "3"
+services:
+  minimal-notebook:
+    image: jupyter/minimal-notebook:latest
+    user: root
+    environment:
+      - CHOWN_HOME:"yes"
+      - CHOWN_HOME_OPTS:"-R"
+    volumes:
+      - ${PWD}:/home/jovyan/work
+    ports:
+      - 10000:8888
