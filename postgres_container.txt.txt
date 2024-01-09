@@ -1,0 +1,7 @@
+https://github.com/docker-library/docs/blob/master/postgres/README.md
+
+--bind mount /var/lib/postgresql/data with volume Z to ~/pgdata creates pgdata folder underneath
+podman run -d --name postgres-init -e POSTGRES_PASSWORD=postgres -e PGDATA=/var/lib/postgresql/data/pgdata -v ~/pgdata:/var/lib/postgresql/data:Z postgres
+
+--Use container ID of running container to open terminal with psql and user postgres
+podman exec -it ab99 psql -U postgres

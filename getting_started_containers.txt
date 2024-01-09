@@ -1,0 +1,820 @@
+
+Virtual Machines have their own kernel on the HyperVisor
+
+Container Runtime uses host machine kernel
+
+System containers are used as a foundation to build your own container images
+--alpine,ubuntu
+--These aren't a replacement of a virutal machine
+
+Application containers are used to start just one application.
+
+Containers rely on features of Linux Kernel
+-namespaces and chroot - limit what can be accessed and seen, resource isolation
+-cgroups - resource limitation
+-SELinux - security
+
+Docker Desktop provides and easy way to run containers on Windows or Mac
+
+Linux containers are ordinary processes on a Linux system
+-Isolated from other processes
+
+All linux processes are started as containers
+-They are all a part of a cgroup
+-- cat /proc/PID/cgroup
+-- cat /proc/self/attr/current --SELinus labels
+-- ls /proc/PID/ns -- list of namespaces
+
+A real container is different in that started from a container image
+
+The container runtime is the operating system part that manages cgroups, SELinux labels and namespaces and starts the container from an image
+
+The container orchestration layer allows for containers to work together. Similar to microservice idea of developing minimal pieces of code and joining them.
+--Kubernetes, OpenShift etc.
+
+A container is a running instance of an image
+An image is the application code, language runtime and libraries
+Container image would also include external libs often provided by host system
+--Tied to a certain linux distro
+The image is a read-only instance of the application
+A writable layer is added so that changes can be stored while working with the container
+
+A container image is basically a tar ball containing:
+--Container root file system - presented as a mount namespace
+--Metadata - JSON file that specified how to run the root file system and settings required
+ -- entrypoint, environment variables, etc.
+Container images are layered
+-you can install additional content, add new JSON file, store differences in new TAR file
+
+Container images are shared through public registries or shared so can be built easily such as with a Dockerfile.
+
+Docker images are made of a series of filesystem layers.
+Each layer adds, remove, or modifies files from the preceding layer in the filesystem.
+--An overlay filesystem
+Apart from different layers, container images have a container configuration file that provides instructions on how to run the container.
+
+May have a small system image like alpine as starting layer
+Ruby application layer would sit on system image layer
+--Since they are different layers setting for both can be managed independently
+--You can add your own application on top of these layers
+
+Container Registry helps with the distribution of images.
+-Can manually distribute with tar balls but not  recommended
+Remote Registries are common
+--DockerHub registry == https:hub.docker.com
+--Quay == https://quay.io
+Local Private Registries
+
+Authenticated Registry Access
+--can use for added functionaliy
+--podman login -- authenticate to the registry
+
+podman pull nginx
+--How you can download the image
+--tags lets to download a specific version of the iamge
+
+Quay registry is for RedHat images
+
+Docker Desktop uses host OS virtualization features to run a Docker virtual machine.
+--Docker CLI to run Docker commands from command line
+--Docker Engine
+--Docker Desktop App
+--Hyper V virtualization
+
+Different from Docker Toolbox
+-Docker Machine - create docker hosts
+-Docker Engine - Acts as the Docker daemon to run Docker containers
+-VirtualBox virtualization platform
+--Older machines
+
+Docker Desktop cannot route traffic to containers so you cannot access an exposed port.
+
+LXC are Linux containers that combine cgroups and namespaces.
+
+CNCF promotes the adoption of cloud-native computing.
+
+Container engine takes a container image and turns it into a container.
+--runtime
+--CLI tool
+--sometimes daemon
+
+Container runtime is a part of the Container engine. Commonly used:
+-CRI-O -- Red Hat
+-containerd -- Docker
+--Setup container lifecycle and image management
+
+Container runtime:
+-Provides mount point
+-Communicates with the kernel
+-Sets up cgroup and namespaces, etc.
+
+runC is a lightweight universal container runtime
+-default runtime defined by OCI
+-Focuses on creating containers.
+-Included in CRI-O and containerd
+
+Kubernetes is the standard orchestration platform
+-OpenShift, Rancher as based on Kubernetes
+
+System images are started with application you want to run. Not required for application image.
+-- docker run -it busybox /bin/sh
+---Sets up a shell in busybox with interactive terminal
+---Use exit (kills the app) or Cntrl-p,Cntrl-q to disconnect
+
+-- docker ps -a, docker ps --all //Overview of all containers started
+-- docker ps //Currently running containers
+
+-- docker run //run the container
+--- docker create //stage the container
+--- docker start //start the staged container
+
+-- docker stop //kill -15
+-- docker kill //kill -9
+-- docker rm //permanently removes image
+
+-- docker search nginx //Give listing of images
+
+Cntrl-Z, bg //continue running the container in the background
+
+-- docker run -d // start a container with a default application and run in detached mode
+
+-- docker inspect // get details about running containers
+-- docker logs //access to primary application STDOUT
+-- docker stats // linux top-like interface
+
+-Docker CLI is the docker command and communicates with the dockerd API
+-dockerd is the Docker daemon that listens for API requests and utilizes containerd
+-containerd manages the container lifecycle and executes running runc. 
+--containerd extracts the image and makes it a runnable container
+-runc is a part of containerd that helps to run the container
+-containerd-shim process allows for daemonless containers, it takes over after runc has started the container
+
+On host OS a Docker container is just a running process
+One container does not have access to the the running parts of other containers
+Using ps aux all the running Docker containers show as Linux processes
+
+ps fax | grep docker -A 3
+--docker is listening of a socket with containerd
+
+docker search --filter "is-official=true" ubuntu
+--Will only show official images
+
+docker images
+--Will show all images locally available
+
+docker run -it centos bash
+--Will run the latest centos, start bash, and open an interactive terminal
+
+(Cntrl-p, Cntrl-q) to disconnect or detach
+Use "exit" to quit the main application
+
+docker run -d centos bash
+--Will run the container in detached mode 
+
+docker attach container-name
+--Will attach to the running container started in detached mode
+
+docker container run 
+--This is the preferred command
+
+docker container run --name web_server -d -p 8080:80 nginx
+--Configures port 8080 on docker host to port forward to port 80 in the container
+
+Containers are Linux processes and have full access to system resources
+Linux kernel provides Cgroups that put a limit on this
+
+-set hard memory limit
+docker run -d -p 8081:80 --memory="128m" nginx
+-set soft limit that is enforced if memory shortage exists
+docker run -d -p 8082:80 --memory-reservation="256m" nginx
+
+Docker has Cgroups notion of CPU Shares. This is a relative weigth.
+All containers get a CPU shares weight of 1024
+
+-Run container on 4 CPU cores with relative CPU shares set to %50 (Half of 1024=512)
+docker run -it --rm -c 512 mycontainer --cpus 4
+
+-Containers can be pinned to a specific core
+--Run Container on 2 cores and specified as 0 and 2
+docker run -it --rm --cpuset-cpus=0,2 mycontainer --cpus 2
+
+--Can inspect current memory restriction with "Memory" parameter
+docker inspect mycontainer
+
+--Specify the core to run so that will be partial on that core rather than expanding across all cores
+docker run -dit --rm -c 2048 --cpuset-cpus=0 --cpus=1 busybox dd if=/dev/zero of=/dev/null
+docker run -dit --rm -c 512 --cpuset-cpus=0 --cpus=1 busybox dd if=/dev/zero of=/dev/null
+
+Inspecting Containers
+
+-Show currently running Containers
+docker ps 
+-Shows containers that have been running but stopped
+docker ps --all
+docker container ls [-a]
+
+-Shows size information (virtual)
+docker ps -s
+
+--process utilization of container
+docker top [containerid]
+--top-like interface
+docker stats
+
+After stopping container can use "docker start" to start again
+Will be able to access stored container files
+
+docker pause [containerid] -- will pause the container
+docker unpause [containerid] -- will restart a previously paused container
+
+When container is started the entrypoint command is started as the defaul command
+
+docker inspect [image] and look for "Cmd" to find which command this is
+
+-Can overwrite the default command and specify a new command while running
+--Need to detach (Cntrl-p, Cntrl-q) Otherwise will shutdown container. Will not run nginx
+docker run --name mynginx -it nginx sh
+
+-To run command inside a container that is already running use. (Can exit out of sh and not primary application)
+docker exec -it mynginx sh
+
+Specify Container Environment Variables
+docker run -d -e MARIADB_ROOT_PASSWORD=secret mariadb
+
+Using docker-compose - declarative approach to start Docker containers from a manifest file written in YAML
+
+In YAML file will include parameters typically used on the command line while starting a Docker container.
+
+-Create a docker.compose.yml file in a directory and run using:
+docker-compose up -d command (detached mode)
+-Remove the container
+docker-compose down
+
+Kubernetes replaces the need for using docker-compose
+podman-compose is a podman alternative to docker-compose
+
+https://docs.oracle.com/en/learn/podman-compose/#install-docker-compose 
+https://fedoramagazine.org/use-docker-compose-with-podman-to-orchestrate-containers-on-fedora/
+
+--Setup Docker Compose with Rootless Podman Socket
+systemctl --user enable podman.socket
+systemctl --user start podman.socket
+systemctl --user status podman.socket
+export DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock
+
+--Setup Docker Compose with Rootful Podman Socket
+sudo systemctl enable --now podman.socket
+sudo systemctl status podman.socket
+
+--Test the Socket
+sudo curl -H "Content-Type: application/json" --unix-socket /var/run/docker.sock http://localhost/_ping
+
+Troubleshooting
+-Use docker ps -a to see if container quit unexpectedlyu
+-Containers that don't start ofen have issue with entrypoint application
+--Last option to run should always be entrypoint
+-Use docker logs <containerid> to connect to STDOUT
+
+RHEL 8
+- OpenShift is a RHEL product for managing containers in an enterprise environment
+- RHEL 8 does not support Docket
+- No docker daemon is required and runs daemon-less
+
+podman: direct management of pods and container images
+buildah: building, pushing, and signing container images
+skopeo: copying, inspecting, and signing images
+
+CRI-O- container runtime interface: container engine that provides container run and build features to podman and buildah
+
+dnf module install container-tools (May already be installed)
+dnf install podman-docker (Docker like syntax with podman)
+
+Container images get fetched from registry
+-- /etc/containers/registries.conf is used to tell RHEL where to go
+---registry.access.redhat.com - no authentication but deprecates
+---registry.redhat.io - requires authentication
+
+Include registry in pull command to ensure where you are getting it
+- podman pull registry.redhat.io/ubi8/ubi
+-podman login [registry] to authenticate
+--- May need to login to Docker registry so that don't get image pull rate limitation issue
+
+podman search [container] -- Give search results for container across registries
+
+Quay.io - open source registry for RHEL
+
+podman images -  will show all imges stored on the local system
+podman inspect [imagename]
+ --Information of running container like Cmd and Entrypoint
+
+podman run [imageid] -- run the container and execute the default command
+--Will attach to the container and enter the current container shell
+podman run -d [imageid] -- detached mode
+podman rmi - remove images
+
+podman run -rm ubuntu:latest cat /etc/os-release
+podman run --rm --name=mycontainer -it ubuntu:latest /bin/bash
+podman run --name=mycontainer -v /dev/log:/dev/log --rm ubuntu:latest logger hello
+--bind mount to /dev/log journalctl of host should show hello with journalctl
+
+Containers in podman can be started by root user or unprivileged user
+In both cases the container is started with its own user namespace
+--has its own /etc/password, etc/shadow files
+
+To run containers as a different UID inside the container use the -u username option
+Can also use container images that specify which user to use
+
+When starting a root container process with a different UID on the host the same UID will be used as the owner of the process on the host.
+
+When using a rootless container the container is started by a non-priveleged user while processes within the container may still have root privideges
+
+These processes don't have any host access privileges as it is a rootless container.
+
+This limits common functionality on the host such as the option to bind to a privieged port.
+
+You can use a rootless container with a non-root user in the container which is the most secure option.
+
+Options to run Containers
+-- root container running a root process in the container
+-- root container, running a non-root process in the container
+-- rootless container running a root process in the container
+-- rootless container running a non-root process in the container
+
+While starting a rootless container that runs a non-root process a mapping must be made between the user inside the container and a user on the host
+
+By default Podman uses the same UID on both
+A UID map file can be used and host users are generated dynamically
+
+Rootful container running Root process shows on Host system as Root
+
+sudo podman run -it quay.io/quary/busybox sh
+#whoami
+root
+# sleep 1000 &
+# ps aux --- Owner is root
+[Disconnect]
+ps aux | grep sleep
+--Owner is root on the host system of sleep 1000
+
+Rootless container running Root process shows on Host system as user
+
+Root container running a non-root process
+
+sudo podman run -it -u 27 quay.io/quary/busybox sh
+--Specifying user 27. Will run as user 27 on the container and host.
+--numeric userid not mapped to existing user
+---Should be user where that numeric userid is not already existing or process will run as that user which may not be wanted and cause unwanted effects.
+
+Rootless container running a non-root process
+--Again specifying user 27 userid
+---In this case 27 is not used by host instead using a mapped userid like 100026
+---In a rootless container can't map to just any userid so is generated dynamically
+
+podman ps --Shows rootless containers
+sudo podman ps -- Shows rootful containers
+
+Using inspect an rootless containers shows no Network Settings. On rootful containers will see Network Settings. (Use sudo for inspect)
+
+Rootless Container UID mappings
+-- /etc/subuid on host OS has userIDS that can be used by the rootless container to map against these userIDs on the host OS
+
+This mapping can also be manually specified
+
+The /proc/PID/uid_map file shows container mappings used inside the container
+
+--Shows mapping of user inside the container against the host user
+podman top -l user huser args
+
+File ownership
+--If user 27 in container creates a file the file will be owned by the generated userID on host OS
+--To see file owner with UID used inside the container.
+--Useful in analyzing file access issues while running rootless containers
+ podman unshare ls -al /volume/mount/point
+
+Buildah
+--A tool that helps in building images
+--Not preferred tool for actually running containers
+--Doesn't need a container runtime daemon but uses runx
+
+Different options exist to build an image
+-Mounting the root directory of a container and modifying that
+-Using native buildah commands
+-From Dockerfile
+-From scratch
+
+Using buildah native commands make it easy to script the entire build process
+
+buildah bud -- build an image froma Dockerfile
+buildah from [imagename] builds an image from another image
+buildah from scratch -- Allows you to build from scratch
+buildah inspect -- Shows container or image metadata
+buildah mount -- Mounts the container root FS
+buildah commit -- Uses updated contents of a container root FS and an FS layer to commit content to a new image
+buildah rmi/rm remove image or container
+buildah unmount -- unmounts container if you have mounted it
+
+buildah images -- list of images
+buildah containers -- list of containers
+
+Images are what a container is started from. A running instance of an image.
+
+Docker images are immutable with each modification adding an extra layer to the pre-existing layers.
+
+The container sees it as a single virutal file system by using UnionFS or another driver.
+
+docker image ls, docker images -- list images stored
+docker history [imageid], docker history image:tag -- Shows the different layers in the image
+
+Each modification adds an image layer.
+
+Creating images
+--From a running container modifications are applied and docker commands are used to write modifications.
+--Using a Dockerfile - Contains instructions for building an image. Each instruction adds a new layer to the image. More control over what files are added to which layer.
+--Use buildah for RHEL
+
+A child image is an image that is created from a parent iamge and incorporates everything in the parent image and adds to it.
+
+First create a working directory -- each project should have its own project directory
+Next write the Docker file
+Finally build the image using Docker command
+
+Dockerfile starts with FROM, identifying the base image to use
+
+-Instructions are executed in the base image and are executed in the order specified.
+-Each Dockerfile instruction runs in a independent container using an intermediate image built from the previous command. Adding multiple instructions results in multiple layers
+-You should try to minimize the amount of layers.
+
+#Identifies the base image to use
+FROM centos
+#Name of the person that maintains the image
+MAINTAINER Sander
+
+#LABEL is a key-value pair optionally used for identification
+
+#INSTRUCTIONS
+# Add repo file --Move file from project directory to the iamge
+# COPY also works like ADD but ADD has more flexibility
+# ADD - can get contents of tar file inside the container
+#     - can fetch files from a URL
+ADD ./sander.repo /etc/yum.repos.do/
+
+# USER specifies the username for RUN, CMD, and ENTRYPOINT instructions
+
+#Execute Command
+# Can use RUN wget to fetch file from url and delete afterward
+RUN yum -y update && ...
+
+#EXPOSE has metadata only information on where the image should run
+
+#ENV defines environment variables to be used within the container
+
+#SPECIFY CMD - can have the default command and arguments to the ENTRYPOINT command
+CMD ["/user/bin/nmap","-sn","127.17.0.0/24"]
+
+ENTRYPOINT is the default command to be processed
+-- If not specified /bin/sh -c is executed as the default command
+CMD provides arguments to the ENTRYPOINT command
+
+If default command specified using CMD instead of ENTRYPOINT the command is executed as an argument to the default entrypoint sh -c, which can give unexpected results.
+
+If arguments to the command are specified within the ENTRYPOINT they cannot be overwritten so they should be passed in with the CMD section instead.
+
+Options like ADD, COPY, ENTRYPOINT, CMD are used in shell form and in exec form
+
+Shell form is a list of items
+- ADD /my/file /mydir
+- ENTRYPOINT /usr/bin/nmap
+
+Exec form is a JSON array of items. This is the preferred way as shell form wraps the command in a shell. Can create unnecessary shell processes.
+- ADD ["/my/file", "mydir"]
+- ENTRYPOINT["/usr/bin/nmap"]
+
+Try not running multiple RUN commands as this creates a new layer. Attempt to use one RUN command with multiple && connecting operations.
+
+RUN yum --disablerepo=* --enablerepo="rhel17-server-rpms" && \
+    yum update -y && \
+    yum install -y nginx
+
+--Build an image using docker build taking in image name and directory. Tag optional.
+docker build -t myimage::latest . //If no tag specified will use latest
+--Ensure complete procedure run again
+docker build --no-cache -t nmap .
+
+--To run use
+docker run nmap, docker run -it nmap /bin/bash
+
+On Docker hub can find good examples of Docker files
+
+Can Save container changes with Docker commit to an image
+- -m commit message -a author, docker commit [options] [container] [image]
+-- docker commit -m "custom web server" -a "Sander" myapache myapache
+
+--Save image as tar ball
+docker save -o myapache.tar myapache
+--Load tarball and import as an image
+docker load -i myapache.tar
+
+Creating Private Registries
+On CentOs:
+
+dnf install docker-distribution
+systemctl enable --name docker-distribution
+-Config is in /etc/docker-distribution/registry/config.yml
+-Registry service listens on port 5000, open it in firewall
+sudo firewall-cmd --add-port 5000/tcp
+
+On Ubuntu:
+docker run -d -p 5000:5000 --restart=always --name registry registry:latest
+sudo ufw allow 5000/tcp
+
+--Need to tag image to push it to your own image registry. Will save tagged image locally.
+docker tag fedora:latest localhost:5000/myfedora
+--Push to local registry
+docker push localhost:5000/myfedora
+docker rmi fedora //Remove local image
+docker rmi localhost:5000/myfedora //Remove tagged image
+--Pull from local registry to get image again from local
+docker pull localhost:5000/myfedora
+
+Can create Automatic Image Builds from Git Repo. Need to setup webhooks.
+--After creating changes to DockerFile on Git will upload and build to Docker Registry the image
+---Pull of Docker Registry image will get the update you committed to Git
+
+Image Use Best Practices
+--Images are multi-layered
+---Should have a minimal base layer if possible as date will still be in base layer
+--Use specific base images (meant for base) and avoid generic os images like ubuntu image as this is likely too big.
+--Consider using multistage builds where a Dockerfile goes through different stages with only the last stage kept.
+--Minimize the number of RUN commands in the Dockerfile as each run command creates its own layer.
+--Can create your own base images if you have many images with a great deal in common.
+--In Kubernetes can use Secrets and Configs to keep data out of the images.
+
+Storage Solutions
+- Use a bind mount to a file system on the host OS
+- Connect to an external (SAN or cloud-based) persistent storage solution. May need ochestration layer.
+- To connect to external storage, volumes are used, specific drivers can specify which volume type to connect to.
+- For temporary data, tmpfs can be used
+
+Storage drivers allow for writing data in the writable layer of the container
+For local use, the local driver and the sshfs driver are available
+
+Different storage drivers are available for local us.
+Storagedrivers are set in /etc/docker/daemon.json
+{
+	"storage-driver":"devicemapper"
+}
+
+CoW Storage Stategy -- Only modifications are stored in the writable filesystem layer
+
+
+Bind mount storage
+-Container mounts a direcotry or file from the host OS into the container
+-host directory can be automatically created with -v option, or --mount
+-The host OS fully controls access to the file
+
+podman run --name=mycontainer -v /dev/log:/dev/log --rm ubuntu:latest logger hello
+--bind mount to /dev/log journalctl of host should show hello with journalctl
+
+docker run --rm -dit --name=bind2 -v "$(pwd)"/bind2:app nginx:latest
+docker inspect [containername] to verify
+--Can see under list of "Mounts"
+
+Place file bond.txt in bind2 folder
+docker exec bind1 ls -l /app -- This shows bond.txt in container folder which matches what is in Host OS bind2 folder
+
+Multiple containers could point to the same bind mount on the host OS
+
+Using volumes for storage
+-Volumes survive the container lifetime
+-Multiple containers can ge simultaneous access to the volumne
+-Data can be stored externally
+-Volumes can be used to transition data from one host to another
+-Volumes live outside of the container and so don't increase container size
+-Volumes use drivers to specify how storage is accessed
+--Enterpirse level drivers are available on the orchestration layer (Kubernetes, Open Shift)
+
+docker volume create myvol -- use local file systems as storage backend
+docker volume ls -- list the volume
+docker volume inspect myvol -- shows the properties of the volume
+docker run -it --name voltest --rm ==mount source=myvol,target=/data nginx:latest /bin/sh
+--runs container and attaches to volum
+
+sudo ls /var/lib/docker/volumes/myvol/_data
+
+To simultaneously access files on volumes from multiple containers a special driver is needed.
+--Use "readonly" mount option to protect from file locking
+-- docker run -it --name voltest --rm ==mount source=myvol,target=/data,readonly nginx:latest /bin/sh
+-For non-orchestrated environment can use the local driver NFS type
+
+Managing Storage in SELinux Environment
+-The host directory must be writable by the container main process
+-If containers are started with a specific UID the number UID can be set.
+--"podman inspect image" and look for User to find which user this is.
+Use sudo chown -R [id]:[id] /hostdir
+Set SELinux:
+
+sudo semanage fcontext -a -t container_file_t "/hostdir(/.*)?" 
+--container_file_t - generic way to refer to container context you want to apply
+---writes the context to the policy but doesn't apply to the filesystem
+---write desired context to SELinux policy
+sudo restorecon -Rv /hostdir
+--apply to filesystem the context
+
+ls -lZd -- shows the SELinux context
+--Will show container_file_t on directory after applying
+
+If user that runs the container is owner of the directory that is going to be bind-mounted, the ":Z" option can be used to automatically set the appropriate SELinux context.
+--recommended approach while useing rootless containers
+
+podman run -d -v /srv/dbfiles:/var/lib/mysql:Z -e MYSQL_ROOT_PASSWORD=password registry.access.redhat.com/rhscl/mysql-57-rhel7
+
+In rootless container don't have access to images stored by root user.
+
+Container Networking
+bridge: The default networking, allows applications in standalone containers to communicate
+host: Removes network isolation between host and containers and allows containers to use the host directly. Available in swarm with Docker.
+overlay: Needing orchestration layer. Allows different Docker daemons to be connected using a software defined network. Allows standalone containers on different Docker hosts to communicate.
+macvlan: Assigns a MAC address to a container, making it appear as a physical device on the network. Good for legacy applications.
+none: Completely disable networking.
+plugins: Third-Party plugins usually seen in orchestration layer.
+
+ip a | less
+--Docker Bridge listed as docker0 and IP address: 172.17.0.1
+
+Bridge conntects to main network (ex:ens33) which connects to the outside
+ens33 is a physical network card on the host
+bridge is a logical device
+
+Connected to the bridge are veth devices which are created by the container
+Using NAT -Network Address Translation containers can communicate to each other and to the outside but incoming traffic will stop.
+
+Port-forwarding to expose containers in a docker environment.
+
+Bridge networking is the default, A container network is created on internal IP address 172.17.0.0/16
+
+Containers will get an IP address in that range when started.
+
+Additional bridge networks can be created
+When creating additonal bridge networks, automatic sevice discovery is added so that new containers can be reached by name.
+No traffic is allowed between different bridge networks because of namespaces that provide strict isolation.
+Can not create routes between different bridge networks.
+
+Bridge is default in Docker and in rootful containers with Podman.
+
+docker network ls -- see default networking
+docker network inspect bridge -- Details of network
+
+Start containers on default network
+ docker run -dit --name alpine1 alpine ash
+Verify the containers are started
+ docker container ls
+Check what is happening on the Network Bridge and notice the ip addresses of the containers
+  docker network inspect bridge
+View the container perspective on current network
+  docker attach alpine1; ip addr show 
+	From here able to ping the bridge IP in docker 172.17.0.1
+
+Create Custom Bridge
+
+Create a custom network
+ docker network create --driver bridge alpine-net
+ docker network ls
+ docker network inspect alpine-net
+
+Start containers on a specific network. If should be on two needs to be done later.
+ 
+docker run -dit --name alpine1 alpine --network alpine-net ash
+
+docker network connect bridge alpine4
+--Have alpine4 connect additionally to the default bridge
+
+You can ping containers on the same bridge using container name
+ping alpine4
+
+ip route show -- Show available routes
+
+Podman rootless containers
+
+Rootless container cannot get an IP address
+--root priviledges required
+Rootless container also cannot bind to a privileged port
+The only way to provide access to rootless container is by configuring port forwarding
+
+In doing inspect of rootless container will not see Network Settings
+An inspect of a rootful container will show the Network Settings
+
+ip a
+cni-podman -- This is the bridge
+veth -- Container that interfaces with the bridge
+
+Port Forwarding -- Container on 8080 forwarded to 8000 on the host
+podman run -d -p 8088:8080 nginx
+
+-Allows access only if traffic coming from a specific IP address
+podman run -d -p 127.0.0.1:8088:8080 nginx
+
+-Find which port mapping applies to a specific container
+-"podman ps" also shows this
+sudo podman port 
+
+In microservices connected containers may be running on different hosts
+In order to directly connect overlay networking is required
+Overlay networding is available in orchestration layers like Swarm and Kubernetes
+
+Hosts on a bridge with each hosts having containers that want to communicate
+
+SDN - software defined networking implements with an agent on the different hosts. The containers can then communicate on this network using orchestration layer.
+
+Container Orchestration
+
+Kubernetes concerns running containers on the cloud
+
+API Resources- define properties that allow you to store your container in the cloud and to store your configuration in a cloud in such a way that it is decoupled.
+You don't have a relation to a specific node in your cloud environment.
+
+These properties that are needed to work with applications in a cloud environment have their result is stored in the Kubernetes database -> etcd
+
+Kubernetes manages pods that manages your container and cloud properties
+
+To manage scalability you use the deployment which determines how you run your pods. This also manages availability.
+
+The configmap is a configuration file stored in the etcd
+
+Not dealing with files stored on local servers
+
+Kubernetes can be used as a managed service in public and private cloud
+-Amazon EKS
+-Google Cloud GKE
+-Azure AKS
+-OpenStack Magnum
+
+Can be used as an on-premise installation and test-drive platform
+
+Common Distributions
+-Canonical Kubernetes - based on opensource runs on-premise and in cloud
+-Rancher -multi-cluster Kubernetes
+-Google Anthos
+-OpenShift - Developed by RedHat on-premise and cloud. Adds features for developer workflow.
+
+Common Learning Environments
+-Minikube - Ubuntu
+-Docker Desktop - Window, MacOs
+-Microk8s
+-K3s
+-Kind
+
+https://minikube.sigs.k8s.io/docs/start/
+https://www.linuxtechi.com/how-to-install-minikube-on-rhel/
+https://minikube.sigs.k8s.io/docs/drivers/podman/
+
+-How to deploy
+kubectl create deploy -h | less
+
+-Create deployment of 3 containers using nginx image
+kubectl create deployment my-dep --image=nginx --replicas=3
+-Show current status of container deployment
+kubectl get all
+
+EX180 specialist in Containers and OpenShift course
+CKAD, CKA certified Kubernetes Developer
+
+Getting Started with Kubernetes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

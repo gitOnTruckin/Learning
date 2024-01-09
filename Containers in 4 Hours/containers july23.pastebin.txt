@@ -1,0 +1,137 @@
+PODMAN COMMAND
+[student@centos ~]$ history
+    1  sudo hostnamectl set-hostname centos.example.com
+    2  exit
+    3  podman run -d redis
+    4  podman run -d docker.io/library/redis
+    5  vim /etc/containers/registries.conf
+    6  podman search ubi9
+    7  podman pull docker.io/redhat/ubi9
+    8  podman pull registry.redhat.io/ubi9
+    9  podman login registry.redhat.io
+   10  podman pull registry.redhat.io/ubi9
+   11  podman images
+   12  history
+   13  podman run fedora
+   14  podman ps
+   15  podman ps -a
+   16  podman run -it fedora
+   17  podman ps
+   18  podman ps -a
+   19  podman exec -it 6207 sh
+   20  cat /etc/os-release 
+   21  uname -r
+   22  podman exec -it 6207 sh
+   23  history
+   24  podman exec -it 6207 sh
+   25  docker ps
+   26  podman ps
+   27  man podman-run
+   28  cd containers/
+   29  history
+   30  podman ps
+   31  podman stop tender_mccarthy 
+   32  podman ps
+   33  sudo find . -name "62075c00ece2*"
+   34  pwd
+   35  cd ..
+   36  sudo find . -name "62075c00ece2*"
+   37  podman start 6207
+   38  podman ps
+   39  podman stop 6207
+   40  podman rm 6207
+   41  sudo find . -name "62075c00ece2*"
+   42  podman inspect 832a | less
+   43  podman images
+   44  podman inspect 7e
+   45  podman inspect 7e | less
+   46  podman run -d mariadb
+   47  podman ps
+   48  podman ps -a
+   49  podman logs awesome_babbage 
+   50  podman run -d --env MARIADB_ROOT_PASSWORD=password mariadb
+   51  podman ps
+   52  podman stats
+   53  podman run --name webserver -d -p 8080:80 nginx
+   54  curl localhost:8080
+   55  podman run -d -p 8081:80 --memory="128m" nginx
+   56  podman ps
+   57  podman stats
+   58  sudo -i
+   59  lscpu | less
+   60  podman run -d --rm -c 512 busybox dd if=/dev/zero of=/dev/null
+   61  podman run -d --rm -c 2048 busybox dd if=/dev/zero of=/dev/null
+   62  podman stats
+   63  podman ps
+   64  top
+   65  podman ps
+   66  podman stop 237
+   67  podman kill c8f
+   68  sudo -i
+   69  history
+
+DOCKER COMMANDSstudent@student-virtual-machine:~$ history
+    1  docker run -d nginx
+    2  docker login registry.redhat.io
+    3  docker pull pull registry.redhat.io/ubi9
+    4  docker pull registry.redhat.io/ubi9
+    5  man docker-run
+    6  docker run -it fedora
+    7  docker ps
+    8  docker ps -a
+    9  sudo apt install git vim  -y
+   10  git clone https://github.com/sandervanvugt/containers
+   11  cd containers/
+   12  ls
+   13  cd dockerfile/
+   14  ls
+   15  vim Dockerfile 
+   16  docker build -t centmap .
+   17  docker images
+   18  docker run centmap
+   19  history
+   20  cd ..
+   21  ls
+   22  cd alpmap/
+   23  docker images
+   24  ls
+   25  vim Dockerfile 
+   26  docker build -t alpmap .
+   27  docker images
+   28  docker run alpmap
+   29  docker run -it nginx sh
+   30  docker run -it alpmap sh
+   31  vim Dockerfile 
+   32  docker build -t alpmap .
+   33  docker run -it alpmap sh
+   34  docker run -d -p 5000:5000 --restart=always --name registry registry:latest
+   35  docker ps
+   36  docker pull fedora
+   37  docker images
+   38  docker tag fedora:latest localhost:5000/myfedora
+   39  docker images
+   40  docker push localhost:5000/myfedora
+   41  docker rmi fedora:latest 
+   42  docker images
+   43  docker rmi localhost:5000/myfedora
+   44  docker exec -it registry sh
+   45  docker pull localhost:5000/myfedora
+   46  docker images
+   47  docker tag 1eb localhost:5000/alpmap
+   48  docker push localhost:5000/alpmap
+   49  cd
+   50  mkdir bind1
+   51  docker run --rm -d --name=bind1 --mount type=bind,source="$(pwd)"/bind1,target=/app nginx:latest
+   52  docker run --rm -dit --name=bind2 -v "$(pwd)"/bind2:/app nginx:latest
+   53  ls
+   54  docker exec -it bind1 sh
+   55  ls /bind1
+   56  ls bind1
+   57  docker stop bind1
+   58  ls bind1
+   59  id
+   60  #docker run -it --name hacked --privileged -v /:/host ubi9 chroot /host
+   61  sudo touch /root/hellofile
+   62  docker run -it --name hacked --privileged -v /:/host ubi9 chroot /host
+   63  docker run -it --name hacked --privileged -v /:/host busybox chroot /host
+   64  history

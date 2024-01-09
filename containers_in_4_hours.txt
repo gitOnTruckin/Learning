@@ -1,0 +1,247 @@
+https://learning.oreilly.com/videos/getting-started-with/9780137649648/
+https://learning.oreilly.com/live-events/kubernetes-in-4-hours/0636920056367/0636920088765/
+https://learning.oreilly.com/scenarios/docker-sandbox/9781492086161/
+
+git clone https://github.com/sandervanvugt/containers
+https://github.com/mialeevs/docker_installation
+
+https://github.com/containers/podman/blob/main/docs/tutorials/basic_networking.md
+https://developers.redhat.com/e-books/podman-action
+https://learning.oreilly.com/library/view/podman-in-action/9781633439689/
+
+Run a process with its dependencies in isolation
+Not able to go beyond your container
+
+The purpose of a container is to start an application
+Container image has all dependencies required to run the application
+
+Docker Hub - Image registry
+
+Docker has container engine - find and run image
+Docker run nginx
+  --Will look for nginx in Docker Hub and start image
+
+Containers run based on Linux
+
+Linux Kernel -> Container Engine -> Nginx
+
+Not many Windows containers but Windows has WSL
+
+A container runtime is needed that is between the operating system and the container itself
+
+Container Runtime can be used on StandAlone and Cloud that fetches the image from the Registry and starts the container.
+
+Container Engine is used to manage your container on standalone. Using Docker, Podman.
+Kubernetes is used to manage your container on the Cloud.
+
+Container Registry can be private
+
+Container Solutions: Docker, Podman - standard RH8 and later
+
+System Images are used to build your own application containers and not a replacement for a  virtual machine.
+
+Application images are used to start just one application. These are the standard.
+
+To run multiple connected containers you need to create a microservice. Use docker-compose or Kubernetes Pods to do this efficiently.
+
+Linux Features based on:
+ namespaces and chroot - isolation
+ cgroups - resource allocation
+
+Containers on other platforms use a Linux virtual machine to provide these features.
+
+A container is a running instance of a image that can be pulled from the container registry. Image has application code, language runtime and libraries.
+
+The container does not include an operating system kernel
+
+The container starts from an image that is downloaded from the image directory. There are also files that can be written to store any changes made while working on the container.
+
+Dockerfile sharing mechanism
+Docker container image format is the standard image format
+
+DockerHub registry is often used to share images: https://hub.docker.com
+
+Container images stored in DockerHub
+Docker files and Docker Compose stored in Git
+
+Web hooks: are POST requests sent to a URL you define in Docker Hub. You can use webhooks to cause an action in another service in response to a push event in the repository.
+
+When using RedHat can look at quay.io. Can also store in local registry.
+
+Container Platforms:
+--Install Docker in Linux virtual machine.
+--User Docker Desktop, Podman Desktop on top of your main computer OS to work with integrated platform on Windows.
+--Run podman directly on RedHat
+
+Podman offers root-less container
+Docker needs users to run it with elevated priviledges - docker group, sudo
+--Makes docker insecure
+Podman any user can run the container
+
+sudo dnf install container-tools -- all you need
+sudo dnf install podman-docker -- provides docker syntax in podman
+
+podman run -d nginx
+
+podman rootless containers can be run with limited user privileges and can be started by non-root users.
+--Have limited access to filesytem and do not get an IP address
+
+Docker Destop is a graphical interface built around Docker Engine
+
+Need to run docker as sudo or as a member of the group "docker"
+
+sudo usermod -aG docker $(USERID)
+
+docker run -d nginx
+--run in detached mode and reattach with podman attach command
+
+In podman registries are specified in
+ /etc/containers/registries.conf
+
+unqualified-search-registries property
+
+You can specify the complete image url to run the exact one you want
+	docker run https://my.registry.com/container::latest
+
+podman pull registry.redhat.io/ubi9
+
+podman pull docker.io/library/postgres
+
+See list of downloaded images
+podman images
+
+Show all currently running containers
+podman ps
+podman ps -a //all containers that have been started in the past
+
+System images like fedora are really starting a bash shell which must be connected to a standard output, input, and error
+
+-Run container in an interactive terminal
+podman run -it fedora 
+
+--Gives you terminal prompt in isolated environment
+
+Cntrl-P, Cntrl-Q to disconnect or deattach from the terminal
+
+-Connect a terminal to a container based on ContainerID of list of images (First 4 enough)
+podman exec -it 6267 sh
+
+-attach to running container, started in backgroud and as interactive terminal but exited
+podman attach [container-name]  //Container Name given by ps auto-generated name
+
+Containers don't have their own kernel they share the same kernel
+
+--help for run command of podman
+man podman-run
+
+podman stop [name or id] (Will kill after 10s)
+podman kill [name or id]
+podman rm [name or id] //remove it (podman ps -a)
+
+--Containers are stored in a directory that you view
+sudo find . -name [ContainerID]
+
+When you remove container directory removed along with everything saved in it.
+
+-get details about a container JSON
+podman inspect [containerid]
+podman inspect [imageid]
+
+--get access to primary application STDOUT
+podman logs [container_name]
+
+If Exit code on podman ps is greater than 0 then have an error
+
+-pass needed environment variables --env, -e
+podman run -d --env MARIADB_ROOT_PASSWORD=password mariadb
+
+Documentation on image registry will give special requirements
+
+--Similar to top concerning constainer stats
+podman stats
+
+--port forwarding of 8080 to 80 run in background
+podman run --name webserver -d -p 8080:80 nginx //can say podman container run as well
+
+Publish a port when you start a container not when already running
+If you are running under podman you cannot map to a privileged port under 1024
+
+--Can set memory limit otherwise will have full access to host resources
+podman run -d -p 8081:80 --memory="128m" nginx
+
+--See memory limits
+docker stats
+
+--Will show port to be used by container
+podman inspect [containerid]
+
+--Can limit the CPU share weight when running the container
+
+Can create networks in rootful containers(Docker, Podman) but not rootless containers(Podman)
+--Is rootful if started by user with root priviledges
+
+Creating an image
+-Can use "docker save" to write modifications of a running container (creates tarball). "docker commit" as well
+-Dockerfile - contains instructions for building an image.
+-Use "buildah" on RHEL to create images
+
+Containerfile only works with Podman. docker only understands Dockerfile
+
+Docker images are running ip addresses unlike Podman
+
+--tag as centmap and provide location of docker file
+docker build -t centmap .
+--run based on tag
+docker run centmap
+
+Cloud optimized images like "alpine" are much smaller
+
+docker run -it nginx sh
+--override the default command and go to bash
+
+Specifying an EntryPoint in docker file will hardcode the command and make it difficult to override
+Can be part of the CMD commands of the docker file instead
+--In this case can override the default command
+
+You are able to use a private registry
+-run docker registry
+-can push the image to the registry
+
+Container Storage
+-When writing files they are added to the container image and may be removed along with the container.
+-There are permanent external storage solutions
+-NFS is a common persistent storage type in non orchestrated environments
+Permament Solution
+-Connect container to a bind mount to a file system on the host OS
+-Connect to external SAN or cloud solutions
+ --container orchestration needed
+-Disconnect storage from containers using it, volumes are used.
+
+Bind Mount
+-Can us --mount and -v
+
+Dan Walsh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
