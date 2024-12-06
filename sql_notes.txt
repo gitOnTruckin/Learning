@@ -1,0 +1,55 @@
+
+Maybe should review where using timestamp instead of timestamptz in the database since could give unexpected results in queries.
+
+If creating general index should do it concurrently
+
+To create new primary key create unique index concurrently and then
+create primary key with this index
+
+Can create constraints with NOT VALID and then use VALIDATE CONSTRAINT command
+NOT VALID would apply 
+
+In changing from char varying to text should be able to do this without
+locking. Can add constraint as above later.
+
+Possibly move current extensions to ext schema and add to search path so don't need to add ext.
+
+May be useful to be able to query Kordinator tables from Safeway, or datamart to live data using Foreign tables and wrappers
+
+Can query many kinds of data with foreign wrappers including csv and web service.
+
+Revist random_page_cost based on the quality of your drives. How fast they are. Are there other parameters that need to be tweaked based on the quality of our system?
+
+Can save data to a mounted folder with a faster filesystem defined as a tablespace and move indexes there for faster indexing, etc.
+
+May want to setup default privileges for backup user to make sure always there
+
+For new database would want xml enabled on install
+
+May want to update functions for use with PARALLEL and other options
+
+Install Python language so we can make web calls in functions?
+
+Needing certain settings set to enable Parallelism in queries: dynamic_shared_memory_type, max_worker_processes, max_parallel_workers,max_parallel_workers_per_gather
+
+What are the steps needed in creating a new table. Write it down.
+
+How to review existing state of the db to look for where missing indexes, or not using indexes, index bloat, overly long queries, when should index be rebuilt.
+
+Stats and analyze are important. Need to determine if stats are accurate and up-to-date.
+
+Run analyze after loading data and creating new indexes.
+
+An index should only be created if the number of distinct values is large enough
+
+A b-tree index does not cover ilike operations. Need to use text_pattern_ops
+
+shared_buffers at 25% available memory
+
+Are we refreshing concurrently our materialized views? Is this needed?
+
+
+
+
+
+

@@ -1,0 +1,17 @@
+
+CREATE SCHEMA ext AUTHORIZATION postgres;
+
+grant usage on schema ext to public;
+grant execute on all functions in schema ext to public;
+
+alter default privileges in schema ext
+   grant execute on functions to public;
+
+alter default privileges in schema ext
+   grant usage on types to public;
+  
+alter extension pg_trgm
+  set schema ext;
+
+ALTER DATABASE postgres_air 
+  SET search_path TO "$user", postgres_air, public, ext;

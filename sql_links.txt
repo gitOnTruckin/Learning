@@ -1,0 +1,25 @@
+https://blog.stackademic.com/techniques-for-optimizing-sql-queries-in-a-high-traffic-application-6663e3f10e23
+
+https://hakibenita.com/sql-for-data-analysis
+
+https://www.postgresql.org/docs/current/using-explain.html
+
+https://hakibenita.com/postgresql-hash-index
+
+https://hakibenita.com/postgresql-unused-index-size
+
+https://hakibenita.com/sql-tricks-application-dba
+
+https://www.depesz.com/2013/04/16/explaining-the-unexplainable/#more-2684
+
+https://tembo.io/blog/optimizing-memory-usage
+
+https://www.timescale.com/learn/postgresql-performance-tuning-optimizing-database-indexes
+
+https://www.crunchydata.com/developers/playground/high-level-performance-analytics
+
+https://medium.com/@it.works/5-things-to-improve-postgresql-database-performance-5fd2699315c5
+
+SELECT a.indexrelname, b.* 
+FROM pg_stat_user_indexes a, LATERAL pgstatindex(indexrelname) b 
+ORDER BY leaf_fragmentation DESC;

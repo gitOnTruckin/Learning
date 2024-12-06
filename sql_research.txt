@@ -1,0 +1,7 @@
+Understand Locking better. 
+
+Understand Transaction types better.
+
+Look into Deferrable, Immediate for contraints related to RESTRICT and NO ACTION
+
+Make notes for yourself to review when creating a new table
